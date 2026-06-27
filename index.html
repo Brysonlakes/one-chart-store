@@ -7,8 +7,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js">
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js">
+    </script>
     <style>
-        /* ----- RESET & BASE ----- */
+        /* ---------- RESET & BASE ---------- */
         * {
             margin: 0;
             padding: 0;
@@ -24,8 +26,6 @@
             max-width: 1400px;
             margin: 0 auto;
         }
-
-        /* ----- NAVBAR ----- */
         .navbar {
             background: #fff;
             padding: 12px 24px;
@@ -105,8 +105,19 @@
             align-items: center;
             justify-content: center;
         }
-
-        /* ----- LAYOUT ----- */
+        .track-link {
+            color: #6c5ce7 !important;
+            font-weight: 600 !important;
+        }
+        .track-link:hover {
+            background: #f0edff !important;
+        }
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
         .store-wrapper {
             display: flex;
             gap: 30px;
@@ -151,13 +162,6 @@
             flex: 1;
             overflow-y: auto;
             padding-right: 4px;
-        }
-        .cart-items-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .cart-items-list::-webkit-scrollbar-thumb {
-            background: #d0d0dc;
-            border-radius: 8px;
         }
         .cart-item {
             display: flex;
@@ -230,8 +234,6 @@
         .cart-item-remove:hover {
             color: #e74c3c;
         }
-
-        /* ----- CART FOOTER (Delivery Fees) ----- */
         .cart-footer {
             border-top: 1px solid #eee;
             padding-top: 12px;
@@ -260,6 +262,42 @@
         }
         .cart-total.grand span:last-child {
             color: #6c5ce7;
+        }
+        .checkout-fields {
+            margin: 8px 0 6px;
+        }
+        .checkout-fields input,
+        .checkout-fields textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1.5px solid #e4e4ec;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-top: 4px;
+            transition: 0.2s;
+        }
+        .checkout-fields input:focus,
+        .checkout-fields textarea:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+        .checkout-fields textarea {
+            resize: vertical;
+            min-height: 50px;
+            font-family: inherit;
+        }
+        .checkout-fields label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #4a4a5a;
+            display: block;
+            margin-top: 6px;
+        }
+        .checkout-fields label:first-child {
+            margin-top: 0;
+        }
+        .checkout-fields .required {
+            color: #e74c3c;
         }
         .btn-payfast {
             width: 100%;
@@ -328,8 +366,6 @@
             margin-bottom: 6px;
             color: #d0d0dc;
         }
-
-        /* ----- HERO ----- */
         .hero {
             background: linear-gradient(135deg, #f0edff 0%, #e8e4ff 100%);
             border-radius: 20px;
@@ -370,6 +406,11 @@
             max-width: 400px;
             margin-bottom: 16px;
         }
+        .hero-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
         .btn-primary {
             display: inline-block;
             background: #6c5ce7;
@@ -387,6 +428,22 @@
             background: #5a4bd1;
             transform: translateY(-2px);
         }
+        .btn-secondary {
+            display: inline-block;
+            background: #fff;
+            color: #6c5ce7;
+            font-weight: 600;
+            padding: 10px 28px;
+            border-radius: 40px;
+            border: 2px solid #6c5ce7;
+            cursor: pointer;
+            transition: 0.25s;
+            font-size: 0.95rem;
+        }
+        .btn-secondary:hover {
+            background: #6c5ce7;
+            color: #fff;
+        }
         .hero-image {
             flex: 0 0 180px;
         }
@@ -396,8 +453,6 @@
             border-radius: 16px;
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
         }
-
-        /* ----- PRODUCTS ----- */
         .section-title {
             font-size: 1.4rem;
             font-weight: 700;
@@ -539,8 +594,6 @@
         .add-to-cart.in-cart:hover {
             background: #1e8449;
         }
-
-        /* ----- PRODUCT DETAIL MODAL ----- */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -634,8 +687,127 @@
         .modal-add-btn:hover {
             background: #5a4bd1;
         }
-
-        /* ----- ADMIN LOGIN FORM ----- */
+        .confirmation-box {
+            max-width: 700px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid #eaeaea;
+            text-align: center;
+        }
+        .confirmation-box .success-icon {
+            font-size: 4rem;
+            color: #27ae60;
+            margin-bottom: 16px;
+        }
+        .confirmation-box h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .confirmation-box .order-summary {
+            text-align: left;
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .confirmation-box .order-summary .items-list {
+            white-space: pre-wrap;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .tracking-box {
+            max-width: 700px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid #eaeaea;
+        }
+        .tracking-box h2 {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .tracking-box .subtitle {
+            text-align: center;
+            color: #6a6a7a;
+            margin-bottom: 24px;
+        }
+        .tracking-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .tracking-form input {
+            padding: 10px 14px;
+            border: 1.5px solid #e4e4ec;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+        .tracking-form input:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+        .tracking-result {
+            margin-top: 24px;
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+        }
+        .tracking-result.visible {
+            display: block;
+        }
+        .tracking-result .order-status {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        .tracking-result .status-pending {
+            background: #f28c28;
+            color: #fff;
+        }
+        .tracking-result .status-cod {
+            background: #27ae60;
+            color: #fff;
+        }
+        .tracking-result .status-shipped {
+            background: #3498db;
+            color: #fff;
+        }
+        .tracking-result .status-delivered {
+            background: #8e44ad;
+            color: #fff;
+        }
+        .tracking-result .items-list {
+            white-space: pre-wrap;
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .tracking-error {
+            color: #e74c3c;
+            font-weight: 600;
+            margin-top: 12px;
+            display: none;
+        }
+        .tracking-error.visible {
+            display: block;
+        }
         #adminLoginForm {
             display: none;
             max-width: 400px;
@@ -650,15 +822,6 @@
             margin-bottom: 16px;
             text-align: center;
         }
-        #adminLoginForm h2 i {
-            color: #6c5ce7;
-        }
-        #adminLoginForm label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 0.9rem;
-        }
         #adminLoginForm input {
             width: 100%;
             padding: 10px 14px;
@@ -666,7 +829,6 @@
             border-radius: 10px;
             font-size: 1rem;
             margin-bottom: 12px;
-            transition: 0.2s;
         }
         #adminLoginForm input:focus {
             outline: none;
@@ -693,8 +855,6 @@
             text-align: center;
             display: none;
         }
-
-        /* ----- ADMIN PANEL ----- */
         #adminPanel {
             display: none;
             background: #fff;
@@ -785,8 +945,6 @@
             font-weight: 800;
             color: #1e1e2a;
         }
-
-        /* Admin Forms & Tables */
         .admin-form {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -814,7 +972,6 @@
             border-radius: 8px;
             font-size: 0.9rem;
             background: #fff;
-            transition: 0.2s;
         }
         .admin-form input:focus,
         .admin-form select:focus {
@@ -890,6 +1047,34 @@
         .btn-edit:hover {
             background: #2980b9;
         }
+        .btn-shipped {
+            background: #27ae60;
+            color: #fff;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+        .btn-shipped:hover {
+            background: #1e8449;
+        }
+        .btn-delivered {
+            background: #8e44ad;
+            color: #fff;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+        .btn-delivered:hover {
+            background: #7d3c98;
+        }
         .admin-table {
             width: 100%;
             border-collapse: collapse;
@@ -912,6 +1097,29 @@
             object-fit: cover;
             border-radius: 6px;
             background: #f2f2f8;
+        }
+        .status-badge {
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-badge.pending {
+            background: #f28c28;
+            color: #fff;
+        }
+        .status-badge.cod {
+            background: #27ae60;
+            color: #fff;
+        }
+        .status-badge.shipped {
+            background: #3498db;
+            color: #fff;
+        }
+        .status-badge.delivered {
+            background: #8e44ad;
+            color: #fff;
         }
         .settings-group {
             background: #f8f9fc;
@@ -943,8 +1151,40 @@
             border-radius: 8px;
             font-size: 0.9rem;
         }
-
-        /* ----- TOAST ----- */
+        .settings-group .form-row .field .password-toggle {
+            position: relative;
+        }
+        .settings-group .form-row .field .password-toggle input {
+            padding-right: 36px;
+        }
+        .settings-group .form-row .field .password-toggle .toggle-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #8a8a9a;
+            font-size: 0.9rem;
+        }
+        .settings-group .form-row .field .password-toggle .toggle-btn:hover {
+            color: #6c5ce7;
+        }
+        .settings-message {
+            margin-top: 8px;
+            font-weight: 600;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .settings-message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .settings-message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
         .toast {
             position: fixed;
             bottom: 30px;
@@ -971,8 +1211,9 @@
             color: #6c5ce7;
             font-size: 1.1rem;
         }
-
-        /* ----- FOOTER ----- */
+        .toast-error i {
+            color: #e74c3c;
+        }
         .footer {
             background: #fff;
             border-top: 1px solid #ececf2;
@@ -986,8 +1227,6 @@
         .footer i {
             color: #e74c3c;
         }
-
-        /* ----- RESPONSIVE ----- */
         @media (max-width: 860px) {
             .store-wrapper {
                 flex-direction: column;
@@ -995,7 +1234,7 @@
             .cart-panel {
                 width: 100%;
                 position: static;
-                max-height: 400px;
+                max-height: 450px;
                 margin-top: 20px;
             }
             .hero {
@@ -1040,6 +1279,28 @@
                 align-items: stretch;
                 text-align: center;
             }
+            .admin-table {
+                font-size: 0.75rem;
+            }
+            .admin-table th,
+            .admin-table td {
+                padding: 4px 4px 4px 0;
+            }
+            .settings-group .form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .settings-group .form-row .field {
+                min-width: unset;
+            }
+            .confirmation-box,
+            .tracking-box {
+                margin: 20px 10px;
+                padding: 24px;
+            }
+            .hero-buttons {
+                justify-content: center;
+            }
         }
         @media (max-width: 480px) {
             body {
@@ -1048,7 +1309,8 @@
             .hero-content h1 {
                 font-size: 1.6rem;
             }
-            .btn-primary {
+            .btn-primary,
+            .btn-secondary {
                 padding: 8px 20px;
                 font-size: 0.85rem;
             }
@@ -1070,53 +1332,68 @@
                 padding: 4px 0;
             }
             .cart-panel {
-                max-height: 300px;
+                max-height: 350px;
+            }
+            .admin-table {
+                font-size: 0.65rem;
+            }
+            .admin-table th,
+            .admin-table td {
+                padding: 2px 2px 2px 0;
+            }
+            .btn-shipped,
+            .btn-delivered {
+                font-size: 0.6rem;
+                padding: 2px 8px;
+            }
+            .confirmation-box,
+            .tracking-box {
+                padding: 16px;
+            }
+            .confirmation-box .success-icon {
+                font-size: 3rem;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar">
+        <div class="logo">One <span>Chart</span> Boutique</div>
+        <div class="nav-links">
+            <a id="goHomeBtn">Home</a>
+            <a id="goTrackBtn" class="track-link"><i class="fas fa-search"></i> Track Order</a>
+            <a id="goAdminBtn" class="admin-link"><i class="fas fa-user-cog"></i> Admin</a>
+        </div>
+        <div class="nav-actions">
+            <button id="searchBtn"><i class="fas fa-search"></i></button>
+            <button id="cartBtn"><i class="fas fa-shopping-bag"></i><span class="cart-badge" id="cartCount">0</span></button>
+        </div>
+    </nav>
 
-        <!-- ===== NAVBAR ===== -->
-        <nav class="navbar">
-            <div class="logo">One <span>Chart</span> Boutique</div>
-            <div class="nav-links">
-                <a id="goAdminBtn" class="admin-link"><i class="fas fa-user-cog"></i> Admin</a>
-                <a id="goStoreBtn">Store</a>
-            </div>
-            <div class="nav-actions">
-                <button id="searchBtn"><i class="fas fa-search"></i></button>
-                <button id="cartBtn">
-                    <i class="fas fa-shopping-bag"></i>
-                    <span class="cart-badge" id="cartCount">0</span>
-                </button>
-            </div>
-        </nav>
-
-        <!-- ===== STOREFRONT ===== -->
+    <!-- ==================== VIEW: STOREFRONT ====================== -->
+    <div id="viewStorefront" class="view active">
         <div id="storefront">
-
-            <!-- Hero -->
             <section class="hero">
                 <div class="hero-content">
                     <span class="badge">🔥 New Collection</span>
                     <h1>Elevate Your <span>Style</span></h1>
                     <p>Premium products curated for the modern lifestyle.</p>
-                    <button class="btn-primary" id="shopNowBtn">Shop Now <i class="fas fa-arrow-right"></i></button>
+                    <div class="hero-buttons">
+                        <button class="btn-primary" id="shopNowBtn">Shop Now <i class="fas fa-arrow-right"></i></button>
+                        <button class="btn-secondary" id="heroTrackBtn"><i class="fas fa-search"></i> Track Order</button>
+                    </div>
                 </div>
                 <div class="hero-image">
                     <img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=400&h=400&fit=crop&crop=center&auto=format" alt="Hero" />
                 </div>
             </section>
 
-            <!-- Products + Cart -->
             <div class="store-wrapper">
                 <div class="product-section">
                     <div class="section-title" id="products">Featured Products</div>
                     <div class="section-sub">Click any product for details</div>
-
                     <div class="categories" id="categoryFilters">
                         <button class="category-pill active" data-category="all">All</button>
                         <button class="category-pill" data-category="electronics">Electronics</button>
@@ -1124,7 +1401,6 @@
                         <button class="category-pill" data-category="home">Home</button>
                         <button class="category-pill" data-category="beauty">Beauty</button>
                     </div>
-
                     <div class="product-grid" id="productGrid"></div>
                 </div>
 
@@ -1135,192 +1411,196 @@
                         <div class="empty-cart"><i class="fas fa-shopping-bag"></i><p>Your cart is empty.</p></div>
                     </div>
                     <div class="cart-footer" id="cartFooter" style="display:none;">
-                        <!-- Subtotal -->
                         <div class="cart-total"><span>Subtotal</span><span id="cartSubtotal">R0.00</span></div>
-                        <!-- Delivery -->
                         <div class="cart-total delivery"><span>Delivery (<span id="bagTypeLabel">Small Plastic</span>)</span><span id="cartDeliveryFee">R0.00</span></div>
-                        <!-- Grand Total -->
                         <div class="cart-total grand"><span>Grand Total</span><span id="cartGrandTotal">R0.00</span></div>
-
-                        <!-- PayFast -->
-                        <form id="payfastForm" action="https://www.payfast.co.za/eng/process" method="post" target="_blank">
-                            <input type="hidden" name="merchant_id" value="35826911" />
-                            <input type="hidden" name="merchant_key" value="ispazfqkakyyi" />
-                            <input type="hidden" name="return_url" value="https://yourstore.com/success.html" />
-                            <input type="hidden" name="cancel_url" value="https://yourstore.com/cancel.html" />
+                        <div class="checkout-fields">
+                            <label>Your Email <span class="required">*</span></label>
+                            <input type="email" id="customerEmail" placeholder="your@email.com" required />
+                            <label>Delivery Address <span class="required">*</span></label>
+                            <textarea id="deliveryAddress" placeholder="Street, City, Province, Code" required></textarea>
+                        </div>
+                        <form id="payfastForm" action="https://www.payfast.co.za/eng/process" method="post" target="_self">
+                            <input type="hidden" name="merchant_id" id="payfastMerchantId" value="35826911" />
+                            <input type="hidden" name="merchant_key" id="payfastMerchantKey" value="ispazfqkakyyi" />
+                            <input type="hidden" name="return_url" value="" />
+                            <input type="hidden" name="cancel_url" value="" />
                             <input type="hidden" name="notify_url" value="https://yourstore.com/notify.html" />
                             <input type="hidden" name="m_payment_id" id="pf_payment_id" />
                             <input type="hidden" name="amount" id="pf_amount" />
                             <input type="hidden" name="item_name" id="pf_item_name" value="One Chart Boutique Order" />
                             <input type="hidden" name="item_description" id="pf_item_description" />
                             <input type="hidden" name="signature" id="pf_signature" />
-                            <button type="submit" class="btn-payfast" id="payfastCheckoutBtn">
-                                <i class="fas fa-credit-card"></i> Pay with PayFast
-                            </button>
+                            <button type="submit" class="btn-payfast" id="payfastCheckoutBtn"><i class="fas fa-credit-card"></i> Pay with PayFast</button>
                         </form>
-
-                        <!-- Divider -->
                         <div class="payment-divider"><span>or</span></div>
-
-                        <!-- Cash on Delivery -->
-                        <button class="btn-cod" id="codCheckoutBtn">
-                            <i class="fas fa-money-bill-wave"></i> Cash on Delivery
-                        </button>
+                        <button class="btn-cod" id="codCheckoutBtn"><i class="fas fa-money-bill-wave"></i> Cash on Delivery</button>
                         <p class="payment-note">Available for local customers only.</p>
                     </div>
                 </div>
             </div>
-
         </div>
-
-        <!-- ===== ADMIN LOGIN FORM ===== -->
-        <div id="adminLoginForm">
-            <h2><i class="fas fa-lock"></i> Admin Login</h2>
-            <label for="adminPwd">Enter Password</label>
-            <input type="password" id="adminPwd" placeholder="Default: admin" />
-            <button id="adminLoginBtn">Login</button>
-            <div id="adminLoginError">❌ Wrong password. Try again.</div>
-        </div>
-
-        <!-- ===== ADMIN PANEL ===== -->
-        <div id="adminPanel">
-            <div class="admin-header">
-                <h1><i class="fas fa-user-shield"></i> Admin Dashboard</h1>
-                <button class="btn-cancel" id="exitAdminBtn">Back to Store</button>
-            </div>
-            <div class="admin-tabs">
-                <button class="admin-tab active" data-tab="dashboard">📊 Dashboard</button>
-                <button class="admin-tab" data-tab="products">📦 Products</button>
-                <button class="admin-tab" data-tab="orders">🛒 Orders</button>
-                <button class="admin-tab" data-tab="settings">⚙️ Settings</button>
-            </div>
-            <div class="admin-content">
-                <!-- Dashboard -->
-                <div id="tabDashboard">
-                    <div class="admin-stats">
-                        <div class="stat-card"><h3>Total Products</h3><div class="stat-number" id="statProducts">0</div></div>
-                        <div class="stat-card"><h3>Total Orders</h3><div class="stat-number" id="statOrders">0</div></div>
-                        <div class="stat-card"><h3>Total Revenue</h3><div class="stat-number" id="statRevenue">R0.00</div></div>
-                    </div>
-                    <div class="admin-stats">
-                        <div class="stat-card"><h3>Store Visits</h3><div class="stat-number" id="statStoreVisits">0</div></div>
-                        <div class="stat-card"><h3>Admin Visits</h3><div class="stat-number" id="statAdminVisits">0</div></div>
-                        <div class="stat-card"><h3>Visits Today</h3><div class="stat-number" id="statTodayVisits">0</div></div>
-                    </div>
-                </div>
-
-                <!-- Products -->
-                <div id="tabProducts" style="display:none;">
-                    <h3 id="productFormTitle">Add New Product</h3>
-                    <form id="productForm" class="admin-form" enctype="multipart/form-data">
-                        <input type="hidden" id="editProductId" value="" />
-                        <div><label>Product Name *</label><input type="text" id="pName" required /></div>
-                        <div><label>Category *</label>
-                            <select id="pCategory">
-                                <option value="electronics">Electronics</option>
-                                <option value="fashion">Fashion</option>
-                                <option value="home">Home & Living</option>
-                                <option value="beauty">Beauty</option>
-                            </select>
-                        </div>
-                        <div><label>Price (R) *</label><input type="number" step="0.01" id="pPrice" required /></div>
-                        <div><label>Old Price (R)</label><input type="number" step="0.01" id="pOldPrice" /></div>
-                        <div class="full-width">
-                            <label>Product Image *</label>
-                            <input type="file" id="pImageFile" accept="image/*" />
-                            <div style="margin-top:6px;">
-                                <img id="imagePreview" class="image-preview" style="display:none;" />
-                                <span id="currentImageName" style="font-size:0.8rem; color:#6a6a7a;"></span>
-                            </div>
-                            <input type="hidden" id="pImageData" value="" />
-                        </div>
-                        <div class="full-width">
-                            <label>Badge</label>
-                            <select id="pBadge">
-                                <option value="">None</option>
-                                <option value="sale">Sale</option>
-                                <option value="new">New</option>
-                            </select>
-                        </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn-cancel" id="resetProductForm">Cancel</button>
-                            <button type="submit" class="btn-save" id="productSubmitBtn">Save Product</button>
-                        </div>
-                    </form>
-                    <h4>Existing Products</h4>
-                    <div style="overflow-x:auto;">
-                        <table class="admin-table">
-                            <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead>
-                            <tbody id="adminProductList"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Orders -->
-                <div id="tabOrders" style="display:none;">
-                    <h3>Order History</h3>
-                    <table class="admin-table">
-                        <thead><tr><th>Order #</th><th>Date</th><th>Items</th><th>Subtotal</th><th>Delivery</th><th>Total</th><th>Payment</th></tr></thead>
-                        <tbody id="adminOrderList"></tbody>
-                    </table>
-                    <p id="noOrdersMsg" style="text-align:center; color:#8a8a9a; padding:20px;">No orders placed yet.</p>
-                </div>
-
-                <!-- Settings -->
-                <div id="tabSettings" style="display:none;">
-                    <h3>Settings</h3>
-                    <div class="settings-group">
-                        <h4><i class="fas fa-key"></i> Change Password</h4>
-                        <div class="form-row">
-                            <div class="field"><label>New Password</label><input type="password" id="newPassword" /></div>
-                            <div class="field"><label>Confirm Password</label><input type="password" id="confirmPassword" /></div>
-                            <button class="btn-save" id="changePasswordBtn">Update</button>
-                        </div>
-                        <div id="passwordMessage" style="margin-top:8px; font-weight:600;"></div>
-                    </div>
-                    <div class="settings-group">
-                        <h4><i class="fas fa-chart-line"></i> Traffic Data</h4>
-                        <p><strong>Store Visits:</strong> <span id="settingsStoreVisits">0</span></p>
-                        <p><strong>Admin Visits:</strong> <span id="settingsAdminVisits">0</span></p>
-                        <p><strong>Visits Today:</strong> <span id="settingsTodayVisits">0</span></p>
-                        <button class="btn-danger" id="resetTrafficBtn">Reset Counters</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== PRODUCT DETAIL MODAL ===== -->
-        <div class="modal-overlay" id="productModal">
-            <div class="modal-box">
-                <button class="modal-close" id="modalClose">&times;</button>
-                <img class="modal-image" id="modalImage" src="" alt="" />
-                <div class="modal-title" id="modalTitle"></div>
-                <div class="modal-category" id="modalCategory"></div>
-                <div class="modal-price">
-                    <span id="modalPrice"></span>
-                    <span class="modal-old-price" id="modalOldPrice"></span>
-                </div>
-                <div class="modal-description" id="modalDescription">Premium quality product, carefully selected for you.</div>
-                <button class="modal-add-btn" id="modalAddBtn">Add to Cart</button>
-            </div>
-        </div>
-
-        <!-- ===== TOAST ===== -->
-        <div class="toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMessage">Done</span></div>
-
-        <!-- ===== FOOTER ===== -->
-        <footer class="footer">
-            <p>Made with <i class="fas fa-heart"></i> &bull; One Chart Boutique &bull; Free shipping over R500</p>
-        </footer>
-
     </div>
+
+    <!-- ==================== VIEW: CONFIRMATION ===================== -->
+    <div id="viewConfirmation" class="view">
+        <div class="confirmation-box">
+            <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+            <h2>Thank You for Your Order! 🎉</h2>
+            <p style="color: #6a6a7a; margin-bottom: 8px;">Your order has been placed successfully.</p>
+            <p style="color: #6a6a7a; margin-bottom: 16px;">A confirmation email has been sent to your inbox.</p>
+            <div class="order-summary" id="confirmationSummary"></div>
+            <button class="btn-primary" id="confirmationContinueBtn">Continue Shopping</button>
+        </div>
+    </div>
+
+    <!-- ==================== VIEW: TRACKING ========================= -->
+    <div id="viewTracking" class="view">
+        <div class="tracking-box">
+            <h2>🔍 Track Your Order</h2>
+            <p class="subtitle">Enter your order number and email to check the status.</p>
+            <div class="tracking-form">
+                <label for="trackOrderId">Order Number</label>
+                <input type="number" id="trackOrderId" placeholder="e.g. 1700000000000" />
+                <label for="trackEmail">Email Address</label>
+                <input type="email" id="trackEmail" placeholder="your@email.com" />
+                <button class="btn-primary" id="trackOrderBtn">Track Order</button>
+            </div>
+            <div class="tracking-result" id="trackingResult"></div>
+            <div class="tracking-error" id="trackingError">❌ Order not found. Please check your order number and email.</div>
+        </div>
+    </div>
+
+    <!-- ==================== ADMIN LOGIN =========================== -->
+    <div id="adminLoginForm">
+        <h2><i class="fas fa-lock"></i> Admin Login</h2>
+        <label for="adminPwd">Enter Password</label>
+        <input type="password" id="adminPwd" placeholder="Default: admin" />
+        <button id="adminLoginBtn">Login</button>
+        <div id="adminLoginError">❌ Wrong password. Try again.</div>
+    </div>
+
+    <!-- ==================== ADMIN PANEL =========================== -->
+    <div id="adminPanel">
+        <div class="admin-header">
+            <h1><i class="fas fa-user-shield"></i> Admin Dashboard</h1>
+            <button class="btn-cancel" id="exitAdminBtn">Back to Store</button>
+        </div>
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="dashboard">📊 Dashboard</button>
+            <button class="admin-tab" data-tab="products">📦 Products</button>
+            <button class="admin-tab" data-tab="orders">🛒 Orders</button>
+            <button class="admin-tab" data-tab="settings">⚙️ Settings</button>
+        </div>
+        <div class="admin-content">
+            <div id="tabDashboard">
+                <div class="admin-stats">
+                    <div class="stat-card"><h3>Total Products</h3><div class="stat-number" id="statProducts">0</div></div>
+                    <div class="stat-card"><h3>Total Orders</h3><div class="stat-number" id="statOrders">0</div></div>
+                    <div class="stat-card"><h3>Total Revenue</h3><div class="stat-number" id="statRevenue">R0.00</div></div>
+                </div>
+                <div class="admin-stats">
+                    <div class="stat-card"><h3>Store Visits</h3><div class="stat-number" id="statStoreVisits">0</div></div>
+                    <div class="stat-card"><h3>Admin Visits</h3><div class="stat-number" id="statAdminVisits">0</div></div>
+                    <div class="stat-card"><h3>Visits Today</h3><div class="stat-number" id="statTodayVisits">0</div></div>
+                </div>
+            </div>
+            <div id="tabProducts" style="display:none;">
+                <h3 id="productFormTitle">Add New Product</h3>
+                <form id="productForm" class="admin-form" enctype="multipart/form-data">
+                    <input type="hidden" id="editProductId" value="" />
+                    <div><label>Product Name *</label><input type="text" id="pName" required /></div>
+                    <div><label>Category *</label><select id="pCategory"><option value="electronics">Electronics</option><option value="fashion">Fashion</option><option value="home">Home</option><option value="beauty">Beauty</option></select></div>
+                    <div><label>Price (R) *</label><input type="number" step="0.01" id="pPrice" required /></div>
+                    <div><label>Old Price (R)</label><input type="number" step="0.01" id="pOldPrice" /></div>
+                    <div class="full-width"><label>Product Image *</label><input type="file" id="pImageFile" accept="image/*" /><div style="margin-top:6px;"><img id="imagePreview" class="image-preview" style="display:none;" /><span id="currentImageName" style="font-size:0.8rem; color:#6a6a7a;"></span></div><input type="hidden" id="pImageData" value="" /></div>
+                    <div class="full-width"><label>Badge</label><select id="pBadge"><option value="">None</option><option value="sale">Sale</option><option value="new">New</option></select></div>
+                    <div class="form-actions"><button type="button" class="btn-cancel" id="resetProductForm">Cancel</button><button type="submit" class="btn-save" id="productSubmitBtn">Save Product</button></div>
+                </form>
+                <h4>Existing Products</h4>
+                <div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead><tbody id="adminProductList"></tbody></table></div>
+            </div>
+            <div id="tabOrders" style="display:none;">
+                <h3>Order History <button class="btn-save" id="refreshOrdersBtn" style="padding:4px 16px; font-size:0.8rem; margin-left:10px;"><i class="fas fa-sync"></i> Refresh</button></h3>
+                <div style="overflow-x:auto;"><table class="admin-table"><thead><tr><th>Order #</th><th>Date</th><th>Items</th><th>Subtotal</th><th>Delivery</th><th>Total</th><th>Payment</th><th>Customer</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminOrderList"></tbody></table></div>
+                <p id="noOrdersMsg" style="text-align:center; color:#8a8a9a; padding:20px;">No orders placed yet.</p>
+            </div>
+            <div id="tabSettings" style="display:none;">
+                <h3>Settings</h3>
+                <div class="settings-group"><h4><i class="fas fa-key"></i> Change Password</h4><div class="form-row"><div class="field"><label>New Password</label><input type="password" id="newPassword" /></div><div class="field"><label>Confirm Password</label><input type="password" id="confirmPassword" /></div><button class="btn-save" id="changePasswordBtn">Update</button></div><div id="passwordMessage" style="margin-top:8px; font-weight:600;"></div></div>
+                <div class="settings-group"><h4><i class="fas fa-envelope"></i> Admin Email</h4><div class="form-row"><div class="field"><label>Email Address</label><input type="email" id="adminEmailInput" placeholder="admin@example.com" /></div><button class="btn-save" id="saveAdminEmailBtn">Save</button></div><div id="adminEmailMessage" style="margin-top:8px; font-weight:600;"></div></div>
+                <div class="settings-group"><h4><i class="fas fa-credit-card"></i> PayFast Credentials</h4><div class="form-row"><div class="field"><label>Merchant ID</label><input type="text" id="payfastMerchantIdInput" placeholder="e.g. 10000100" /></div><div class="field"><label>Merchant Key</label><div class="password-toggle"><input type="password" id="payfastMerchantKeyInput" placeholder="e.g. abc123def456" /><button class="toggle-btn" id="togglePayfastKey" type="button"><i class="fas fa-eye"></i></button></div></div><button class="btn-save" id="savePayfastBtn">Save</button></div><div id="payfastMessage" style="margin-top:8px; font-weight:600;"></div></div>
+                <div class="settings-group"><h4><i class="fas fa-chart-line"></i> Traffic Data</h4>
+                    <p><strong>Store Visits:</strong> <span id="settingsStoreVisits">0</span></p>
+                    <p><strong>Admin Visits:</strong> <span id="settingsAdminVisits">0</span></p>
+                    <p><strong>Visits Today:</strong> <span id="settingsTodayVisits">0</span></p>
+                    <button class="btn-danger" id="resetTrafficBtn">Reset Counters</button>
+                    <button class="btn-danger" id="clearOrdersBtn" style="margin-top:8px;"><i class="fas fa-trash"></i> Clear All Orders</button>
+                </div>
+                <div class="settings-group">
+                    <h4><i class="fas fa-envelope"></i> EmailJS Test</h4>
+                    <p style="font-size:0.85rem; color:#6a6a7a; margin-bottom:8px;">Send a test email to verify your EmailJS setup.</p>
+                    <div class="form-row">
+                        <div class="field"><label>Test Email Address</label><input type="email" id="testEmailInput" placeholder="your@email.com" /></div>
+                        <button class="btn-save" id="sendTestEmailBtn">Send Test Email</button>
+                    </div>
+                    <div id="testEmailMessage" style="margin-top:8px; font-weight:600;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PRODUCT MODAL ========================= -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-box">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <img class="modal-image" id="modalImage" src="" alt="" />
+            <div class="modal-title" id="modalTitle"></div>
+            <div class="modal-category" id="modalCategory"></div>
+            <div class="modal-price"><span id="modalPrice"></span><span class="modal-old-price" id="modalOldPrice"></span></div>
+            <div class="modal-description" id="modalDescription">Premium quality product, carefully selected for you.</div>
+            <button class="modal-add-btn" id="modalAddBtn">Add to Cart</button>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST ================================ -->
+    <div class="toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMessage">Done</span></div>
+
+    <!-- ==================== FOOTER =============================== -->
+    <footer class="footer">
+        <p>Made with <i class="fas fa-heart"></i> &bull; One Chart Boutique &bull; Free shipping over R500</p>
+    </footer>
 
     <!-- ============================================================ -->
     <!-- ======================== JAVASCRIPT ========================= -->
     <!-- ============================================================ -->
     <script>
         // ============================================================
-        // 1. DEFAULT PRODUCTS
+        // 0. CONFIGURATION
+        // ============================================================
+        function getConfig(key, defaultValue) {
+            const stored = localStorage.getItem(key);
+            return stored !== null ? stored : defaultValue;
+        }
+
+        function setConfig(key, value) {
+            localStorage.setItem(key, value);
+        }
+
+        let ADMIN_EMAIL = getConfig('admin_email', 'nathicibi2@gmail.com');
+        let PAYFAST_MERCHANT_ID = getConfig('payfast_merchant_id', '35826911');
+        let PAYFAST_MERCHANT_KEY = getConfig('payfast_merchant_key', 'ispazfqkakyyi');
+
+        const EMAILJS_PUBLIC_KEY = 'ogsprvUI4kYHL5lIM';
+        const EMAILJS_SERVICE_ID = 'service_58vqm0u';
+        const EMAILJS_TEMPLATE_CUSTOMER = 'template_z5gpgdp';
+        const EMAILJS_TEMPLATE_SHIPPING = 'template_2cewy53';
+
+        (function() { emailjs.init(EMAILJS_PUBLIC_KEY);
+            console.log('📧 EmailJS initialized'); })();
+
+        // ============================================================
+        // 1. DEFAULT PRODUCTS (8 Products)
         // ============================================================
         const defaultProducts = [
             { id: 1, name: 'Wireless Headphones', category: 'electronics', price: 149.99, oldPrice: 199.99,
@@ -1364,9 +1644,7 @@
             return defaultProducts;
         }
 
-        function saveProducts(products) {
-            localStorage.setItem('store_products', JSON.stringify(products));
-        }
+        function saveProducts(products) { localStorage.setItem('store_products', JSON.stringify(products)); }
 
         function getOrders() {
             try {
@@ -1381,6 +1659,12 @@
 
         function saveOrders(orders) {
             localStorage.setItem('store_orders', JSON.stringify(orders));
+            console.log('📋 Orders saved:', orders.length);
+        }
+
+        function clearAllOrders() {
+            localStorage.removeItem('store_orders');
+            console.log('🗑️ Orders cleared');
         }
 
         function getTraffic() {
@@ -1394,16 +1678,21 @@
             return { storeVisits: 0, adminVisits: 0, todayDate: '', todayCount: 0 };
         }
 
-        function saveTraffic(data) {
-            localStorage.setItem('traffic_data', JSON.stringify(data));
-        }
+        function saveTraffic(data) { localStorage.setItem('traffic_data', JSON.stringify(data)); }
 
-        function getAdminPassword() {
-            return localStorage.getItem('admin_password') || 'admin';
-        }
+        function getAdminPassword() { return localStorage.getItem('admin_password') || 'admin'; }
 
-        function setAdminPassword(pwd) {
-            localStorage.setItem('admin_password', pwd);
+        function setAdminPassword(pwd) { localStorage.setItem('admin_password', pwd); }
+
+        // ---- New: pending payments storage ----
+        function getPendingPayments() {
+            try {
+                const stored = localStorage.getItem('pending_payments');
+                return stored ? JSON.parse(stored) : {};
+            } catch (e) { return {}; }
+        }
+        function savePendingPayments(obj) {
+            localStorage.setItem('pending_payments', JSON.stringify(obj));
         }
 
         // ============================================================
@@ -1417,7 +1706,16 @@
         let isAdminLoggedIn = false;
 
         // ============================================================
-        // 4. DOM REFS
+        // 4. VIEW MANAGEMENT
+        // ============================================================
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById(viewId);
+            if (target) target.classList.add('active');
+        }
+
+        // ============================================================
+        // 5. DOM REFS
         // ============================================================
         const grid = document.getElementById('productGrid');
         const cartItemsList = document.getElementById('cartItemsList');
@@ -1428,25 +1726,34 @@
         const bagTypeLabel = document.getElementById('bagTypeLabel');
         const cartBadgeCount = document.getElementById('cartBadgeCount');
         const cartCount = document.getElementById('cartCount');
+        const customerEmail = document.getElementById('customerEmail');
+        const deliveryAddress = document.getElementById('deliveryAddress');
         const toast = document.getElementById('toast');
         const toastMsg = document.getElementById('toastMessage');
 
-        const storefront = document.getElementById('storefront');
+        const goHomeBtn = document.getElementById('goHomeBtn');
+        const goTrackBtn = document.getElementById('goTrackBtn');
+        const heroTrackBtn = document.getElementById('heroTrackBtn');
+        const goAdminBtn = document.getElementById('goAdminBtn');
+        const exitAdminBtn = document.getElementById('exitAdminBtn');
+        const confirmationSummary = document.getElementById('confirmationSummary');
+        const confirmationContinueBtn = document.getElementById('confirmationContinueBtn');
+        const trackOrderId = document.getElementById('trackOrderId');
+        const trackEmail = document.getElementById('trackEmail');
+        const trackOrderBtn = document.getElementById('trackOrderBtn');
+        const trackingResult = document.getElementById('trackingResult');
+        const trackingError = document.getElementById('trackingError');
+
         const adminLoginForm = document.getElementById('adminLoginForm');
         const adminPanel = document.getElementById('adminPanel');
-        const goAdminBtn = document.getElementById('goAdminBtn');
-        const goStoreBtn = document.getElementById('goStoreBtn');
-        const exitAdminBtn = document.getElementById('exitAdminBtn');
         const adminPwd = document.getElementById('adminPwd');
         const adminLoginBtn = document.getElementById('adminLoginBtn');
         const adminLoginError = document.getElementById('adminLoginError');
-
         const adminTabs = document.querySelectorAll('.admin-tab');
         const tabDashboard = document.getElementById('tabDashboard');
         const tabProducts = document.getElementById('tabProducts');
         const tabOrders = document.getElementById('tabOrders');
         const tabSettings = document.getElementById('tabSettings');
-
         const productForm = document.getElementById('productForm');
         const editProductId = document.getElementById('editProductId');
         const pName = document.getElementById('pName');
@@ -1464,7 +1771,6 @@
         const adminProductList = document.getElementById('adminProductList');
         const adminOrderList = document.getElementById('adminOrderList');
         const noOrdersMsg = document.getElementById('noOrdersMsg');
-
         const statProducts = document.getElementById('statProducts');
         const statOrders = document.getElementById('statOrders');
         const statRevenue = document.getElementById('statRevenue');
@@ -1479,6 +1785,19 @@
         const changePasswordBtn = document.getElementById('changePasswordBtn');
         const passwordMessage = document.getElementById('passwordMessage');
         const resetTrafficBtn = document.getElementById('resetTrafficBtn');
+        const clearOrdersBtn = document.getElementById('clearOrdersBtn');
+        const adminEmailInput = document.getElementById('adminEmailInput');
+        const saveAdminEmailBtn = document.getElementById('saveAdminEmailBtn');
+        const adminEmailMessage = document.getElementById('adminEmailMessage');
+        const payfastMerchantIdInput = document.getElementById('payfastMerchantIdInput');
+        const payfastMerchantKeyInput = document.getElementById('payfastMerchantKeyInput');
+        const savePayfastBtn = document.getElementById('savePayfastBtn');
+        const payfastMessage = document.getElementById('payfastMessage');
+        const togglePayfastKey = document.getElementById('togglePayfastKey');
+        const refreshOrdersBtn = document.getElementById('refreshOrdersBtn');
+        const testEmailInput = document.getElementById('testEmailInput');
+        const sendTestEmailBtn = document.getElementById('sendTestEmailBtn');
+        const testEmailMessage = document.getElementById('testEmailMessage');
 
         const pfPaymentId = document.getElementById('pf_payment_id');
         const pfAmount = document.getElementById('pf_amount');
@@ -1487,7 +1806,6 @@
         const payfastForm = document.getElementById('payfastForm');
         const codCheckoutBtn = document.getElementById('codCheckoutBtn');
 
-        // Modal refs
         const modal = document.getElementById('productModal');
         const modalClose = document.getElementById('modalClose');
         const modalImage = document.getElementById('modalImage');
@@ -1499,19 +1817,21 @@
         let currentModalProduct = null;
 
         // ============================================================
-        // 5. TOAST
+        // 6. TOAST
         // ============================================================
         let toastTimeout;
 
-        function showToast(msg) {
+        function showToast(msg, isError = false) {
             toastMsg.textContent = msg;
+            toast.className = 'toast';
+            if (isError) toast.classList.add('toast-error');
             toast.classList.add('show');
             clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2600);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
         // ============================================================
-        // 6. PAYFAST SIGNATURE
+        // 7. PAYFAST SIGNATURE
         // ============================================================
         function generateSignature(data, passphrase = '') {
             try {
@@ -1522,55 +1842,200 @@
                 str = str.slice(0, -1);
                 if (passphrase) str += '&passphrase=' + encodeURIComponent(passphrase.trim());
                 return CryptoJS.MD5(str).toString();
-            } catch (e) {
-                return '';
-            }
+            } catch (e) { return ''; }
         }
 
         // ============================================================
-        // 7. DELIVERY FEE CALCULATOR
+        // 8. DELIVERY FEE
         // ============================================================
         function calculateDelivery(cartItems) {
+            if (!cartItems || cartItems.length === 0) {
+                return { subtotal: 0, deliveryFee: 0, bagType: 'None', grandTotal: 0 };
+            }
             const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
             const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-            const shoeCount = cartItems
-                .filter(item => item.category === 'fashion' || item.name.toLowerCase().includes('shoe'))
-                .reduce((sum, item) => sum + item.quantity, 0);
-
-            let deliveryFee = 0;
-            let bagType = 'None';
-
+            const shoeCount = cartItems.filter(item => item.category === 'fashion' || item.name.toLowerCase().includes(
+                'shoe')).reduce((sum, item) => sum + item.quantity, 0);
+            let deliveryFee = 0,
+                bagType = 'None';
             if (cartItems.length > 0) {
                 deliveryFee = 120;
                 bagType = 'Small Plastic';
-                if (totalItems >= 8 || shoeCount >= 2) {
-                    deliveryFee = 140;
-                    bagType = 'Large Plastic';
-                }
+                if (totalItems >= 8 || shoeCount >= 2) { deliveryFee = 140;
+                    bagType = 'Large Plastic'; }
             }
-
-            return {
-                subtotal: subtotal,
-                deliveryFee: deliveryFee,
-                bagType: bagType,
-                grandTotal: subtotal + deliveryFee,
-                totalItems: totalItems,
-                shoeCount: shoeCount
-            };
+            return { subtotal, deliveryFee, bagType, grandTotal: subtotal + deliveryFee };
         }
 
         // ============================================================
-        // 8. CART LOGIC
+        // 9. EMAIL FUNCTIONS
+        // ============================================================
+        function formatItemsList(items) {
+            return items.map(item => `${item.name} x${item.quantity} - R${item.price.toFixed(2)}`).join('\n');
+        }
+
+        function sendOrderEmails(order, paymentMethod, customerEmailAddr, deliveryAddr) {
+            const info = calculateDelivery(order.items);
+            const itemsList = formatItemsList(order.items);
+
+            const baseData = {
+                order_id: order.id,
+                order_date: order.date || 'N/A',
+                payment_method: paymentMethod || 'N/A',
+                delivery_address: deliveryAddr || 'Not provided',
+                items_list: itemsList || 'No items',
+                subtotal: info.subtotal.toFixed(2) || '0.00',
+                delivery_fee: info.deliveryFee.toFixed(2) || '0.00',
+                bag_type: info.bagType || 'None',
+                grand_total: info.grandTotal.toFixed(2) || '0.00'
+            };
+
+            if (customerEmailAddr && customerEmailAddr.includes('@')) {
+                const customerData = {
+                    ...baseData,
+                    subject: 'Order Confirmation #' + order.id,
+                    to_email: customerEmailAddr,
+                    to_name: 'Customer',
+                    customer_email: ''
+                };
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CUSTOMER, customerData)
+                    .then(() => console.log('✅ Customer confirmation sent to', customerEmailAddr))
+                    .catch(err => console.error('❌ Customer email failed:', err));
+            }
+
+            const adminData = {
+                ...baseData,
+                subject: '🔔 New Order #' + order.id,
+                to_email: ADMIN_EMAIL,
+                to_name: 'Admin',
+                customer_email: customerEmailAddr || 'Not provided'
+            };
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CUSTOMER, adminData)
+                .then(() => console.log('✅ Admin notification sent to', ADMIN_EMAIL))
+                .catch(err => console.error('❌ Admin email failed:', err));
+        }
+
+        function sendShippingNotification(order, trackingNumber, isDelivered = false) {
+            if (!order.customerEmail || !order.customerEmail.includes('@')) return Promise.reject('No email');
+            const info = calculateDelivery(order.items);
+            const data = {
+                order_id: order.id,
+                order_date: order.date,
+                items_list: formatItemsList(order.items),
+                subtotal: info.subtotal.toFixed(2),
+                delivery_fee: info.deliveryFee.toFixed(2),
+                bag_type: info.bagType,
+                grand_total: info.grandTotal.toFixed(2),
+                tracking_number: trackingNumber || 'N/A',
+                delivery_address: order.deliveryAddress || 'Not provided',
+                to_email: order.customerEmail,
+                to_name: 'Customer'
+            };
+            return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_SHIPPING, data)
+                .then(() => showToast(`✅ ${isDelivered ? 'Delivery' : 'Shipping'} notification sent`))
+                .catch(err => { showToast(`❌ ${isDelivered ? 'Delivery' : 'Shipping'} email failed.`, true);
+                    throw err; });
+        }
+
+        // ============================================================
+        // 10. ADMIN ORDER ACTIONS
+        // ============================================================
+        function markOrderShipped(orderId) {
+            orders = getOrders();
+            const idx = orders.findIndex(o => o.id === orderId);
+            if (idx === -1) return showToast('❌ Order not found', true);
+            const tracking = prompt('📦 Enter tracking number (optional):', '');
+            if (tracking === null) return;
+            orders[idx].status = 'On the Way';
+            orders[idx].trackingNumber = tracking || 'N/A';
+            orders[idx].shippedDate = new Date().toLocaleString();
+            saveOrders(orders);
+            sendShippingNotification(orders[idx], tracking || 'N/A', false).finally(() => { renderAdminOrders();
+                renderAdminStats(); });
+        }
+
+        function markOrderDelivered(orderId) {
+            orders = getOrders();
+            const idx = orders.findIndex(o => o.id === orderId);
+            if (idx === -1) return showToast('❌ Order not found', true);
+            if (!confirm(`Mark order #${orderId} as Delivered?`)) return;
+            orders[idx].status = 'Delivered';
+            orders[idx].deliveredDate = new Date().toLocaleString();
+            saveOrders(orders);
+            sendShippingNotification(orders[idx], orders[idx].trackingNumber || 'N/A', true).finally(() => { renderAdminOrders
+                    (); renderAdminStats(); });
+        }
+
+        // ============================================================
+        // 11. CONFIRMATION & TRACKING
+        // ============================================================
+        function renderConfirmation(order) {
+            const info = calculateDelivery(order.items);
+            const itemsHtml = order.items.map(i => `${i.name} x${i.quantity} - R${i.price.toFixed(2)}`).join('\n');
+            confirmationSummary.innerHTML = `
+                        <p><strong>Order #${order.id}</strong></p>
+                        <p><strong>Date:</strong> ${order.date}</p>
+                        <p><strong>Status:</strong> <span class="status-badge ${order.status.includes('COD')?'cod':order.status.includes('Way')?'shipped':order.status.includes('Delivered')?'delivered':'pending'}">${order.status || 'Pending'}</span></p>
+                        <p><strong>Payment:</strong> ${order.status.includes('COD')?'Cash on Delivery':'PayFast'}</p>
+                        <p><strong>Address:</strong> ${order.deliveryAddress || 'Not provided'}</p>
+                        <p><strong>Items:</strong></p>
+                        <pre class="items-list">${itemsHtml}</pre>
+                        <p><strong>Subtotal:</strong> R${info.subtotal.toFixed(2)}</p>
+                        <p><strong>Delivery (${info.bagType}):</strong> R${info.deliveryFee.toFixed(2)}</p>
+                        <p><strong>Grand Total:</strong> R${info.grandTotal.toFixed(2)}</p>
+                        <p style="color:#27ae60; font-weight:600; margin-top:8px;">✅ A confirmation email has been sent.</p>
+                    `;
+        }
+
+        function trackOrder() {
+            const id = parseInt(trackOrderId.value.trim());
+            const email = trackEmail.value.trim();
+            if (!id || !email) {
+                trackingResult.classList.remove('visible');
+                trackingError.classList.add('visible');
+                trackingError.textContent = '❌ Please enter both Order Number and Email.';
+                return;
+            }
+            orders = getOrders();
+            const order = orders.find(o => o.id === id && o.customerEmail === email);
+            if (!order) {
+                trackingResult.classList.remove('visible');
+                trackingError.classList.add('visible');
+                trackingError.textContent = '❌ Order not found.';
+                return;
+            }
+            trackingError.classList.remove('visible');
+            const info = calculateDelivery(order.items);
+            const itemsHtml = order.items.map(i => `${i.name} x${i.quantity} - R${i.price.toFixed(2)}`).join('\n');
+            let statusClass = 'pending',
+                statusText = order.status || 'Pending';
+            if (statusText.includes('COD')) statusClass = 'cod';
+            else if (statusText.includes('Way')) statusClass = 'shipped';
+            else if (statusText.includes('Delivered')) statusClass = 'delivered';
+            trackingResult.innerHTML = `
+                        <h3 style="margin-bottom:8px;">Order #${order.id}</h3>
+                        <p><strong>Date:</strong> ${order.date}</p>
+                        <p><strong>Status:</strong> <span class="order-status ${statusClass}">${statusText}</span></p>
+                        ${order.shippedDate ? `<p><strong>Shipped:</strong> ${order.shippedDate}</p>` : ''}
+                        ${order.deliveredDate ? `<p><strong>Delivered:</strong> ${order.deliveredDate}</p>` : ''}
+                        ${order.trackingNumber ? `<p><strong>Tracking:</strong> ${order.trackingNumber}</p>` : ''}
+                        <p><strong>Address:</strong> ${order.deliveryAddress || 'Not provided'}</p>
+                        <p><strong>Items:</strong></p>
+                        <pre class="items-list">${itemsHtml}</pre>
+                        <p><strong>Total:</strong> R${info.grandTotal.toFixed(2)}</p>
+                    `;
+            trackingResult.classList.add('visible');
+        }
+
+        // ============================================================
+        // 12. CART LOGIC
         // ============================================================
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
             const existing = cart.find(item => item.id === productId);
-            if (existing) {
-                existing.quantity += 1;
-            } else {
-                cart.push({ ...product, quantity: 1 });
-            }
+            if (existing) existing.quantity += 1;
+            else cart.push({ ...product, quantity: 1 });
             showToast('Added "' + product.name + '"');
             updateCartUI();
             document.querySelectorAll(`.add-to-cart[data-id="${productId}"]`).forEach(b => {
@@ -1582,11 +2047,8 @@
         function removeFromCart(productId) {
             const idx = cart.findIndex(item => item.id === productId);
             if (idx === -1) return;
-            if (cart[idx].quantity > 1) {
-                cart[idx].quantity -= 1;
-            } else {
-                cart.splice(idx, 1);
-            }
+            if (cart[idx].quantity > 1) cart[idx].quantity -= 1;
+            else cart.splice(idx, 1);
             updateCartUI();
             document.querySelectorAll(`.add-to-cart[data-id="${productId}"]`).forEach(b => {
                 if (!cart.some(item => item.id === productId)) {
@@ -1600,62 +2062,52 @@
             const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
             cartCount.textContent = totalItems;
             cartBadgeCount.textContent = totalItems;
-
             if (cart.length === 0) {
                 cartItemsList.innerHTML =
                     `<div class="empty-cart"><i class="fas fa-shopping-bag"></i><p>Your cart is empty.</p></div>`;
                 cartFooter.style.display = 'none';
                 return;
             }
-
             cartFooter.style.display = 'block';
             let html = '';
             cart.forEach(item => {
                 html += `
-                        <div class="cart-item">
-                            <div class="cart-item-image"><img src="${item.image}" onerror="this.src='https://placehold.co/60/eee/ccc?text=?'"></div>
-                            <div class="cart-item-details">
-                                <div class="cart-item-name">${item.name}</div>
-                                <div class="cart-item-price">R${item.price.toFixed(2)}</div>
-                                <div class="cart-item-qty">
-                                    <button onclick="removeFromCart(${item.id})">−</button>
-                                    <span>${item.quantity}</span>
-                                    <button onclick="addToCart(${item.id})">+</button>
+                            <div class="cart-item">
+                                <div class="cart-item-image"><img src="${item.image}" onerror="this.src='https://placehold.co/60/eee/ccc?text=?'"></div>
+                                <div class="cart-item-details">
+                                    <div class="cart-item-name">${item.name}</div>
+                                    <div class="cart-item-price">R${item.price.toFixed(2)}</div>
+                                    <div class="cart-item-qty">
+                                        <button onclick="removeFromCart(${item.id})">−</button>
+                                        <span>${item.quantity}</span>
+                                        <button onclick="addToCart(${item.id})">+</button>
+                                    </div>
                                 </div>
+                                <button class="cart-item-remove" onclick="removeFromCart(${item.id})"><i class="fas fa-trash-alt"></i></button>
                             </div>
-                            <button class="cart-item-remove" onclick="removeFromCart(${item.id})"><i class="fas fa-trash-alt"></i></button>
-                        </div>
-                    `;
+                        `;
             });
             cartItemsList.innerHTML = html;
-
             const info = calculateDelivery(cart);
             cartSubtotal.textContent = `R${info.subtotal.toFixed(2)}`;
             cartDeliveryFee.textContent = `R${info.deliveryFee.toFixed(2)}`;
             bagTypeLabel.textContent = info.bagType;
             cartGrandTotal.textContent = `R${info.grandTotal.toFixed(2)}`;
-
-            window._currentDeliveryInfo = info;
         }
 
         // ============================================================
-        // 9. PRODUCT DETAIL MODAL
+        // 13. PRODUCT DETAIL MODAL
         // ============================================================
         function openProductDetail(id) {
             const product = products.find(p => p.id === id);
             if (!product) return;
             currentModalProduct = product;
             modalImage.src = product.image;
-            modalImage.alt = product.name;
             modalTitle.textContent = product.name;
             modalCategory.textContent = product.category.toUpperCase();
             modalPrice.textContent = 'R' + product.price.toFixed(2);
-            if (product.oldPrice) {
-                modalOldPrice.textContent = 'R' + product.oldPrice.toFixed(2);
-                modalOldPrice.style.display = 'inline';
-            } else {
-                modalOldPrice.style.display = 'none';
-            }
+            modalOldPrice.textContent = product.oldPrice ? 'R' + product.oldPrice.toFixed(2) : '';
+            modalOldPrice.style.display = product.oldPrice ? 'inline' : 'none';
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
@@ -1665,137 +2117,256 @@
             document.body.style.overflow = '';
             currentModalProduct = null;
         }
-
         modalClose.addEventListener('click', closeModal);
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeModal();
-        });
-
+        modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
         modalAddBtn.addEventListener('click', function() {
-            if (currentModalProduct) {
-                addToCart(currentModalProduct.id);
-                closeModal();
-            }
+            if (currentModalProduct) { addToCart(currentModalProduct.id);
+                closeModal(); }
         });
 
         // ============================================================
-        // 10. PAYFAST CHECKOUT (with delivery)
+        // 14. CHECKOUT – FIXED PAYFAST (ORDER ONLY AFTER PAYMENT)
         // ============================================================
-        function processPayFastCheckout(e) {
-            e.preventDefault();
-            if (cart.length === 0) { showToast('Cart is empty'); return; }
+        function validateCheckout() {
+            const email = customerEmail.value.trim();
+            const address = deliveryAddress.value.trim();
+            if (!email) { showToast('❌ Please enter your email.', true);
+                customerEmail.focus(); return null; }
+            if (!email.includes('@')) { showToast('❌ Invalid email.', true);
+                customerEmail.focus(); return null; }
+            if (!address) { showToast('❌ Please enter your address.', true);
+                deliveryAddress.focus(); return null; }
+            return { email, address };
+        }
 
-            const info = calculateDelivery(cart);
+        // ---- New: handle PayFast return from URL ----
+        function handlePaymentReturn() {
+            const params = new URLSearchParams(window.location.search);
+            const paymentStatus = params.get('payment_status');
+            const paymentId = params.get('m_payment_id');
+            if (!paymentId || !paymentStatus) return false;
+            if (paymentStatus !== 'COMPLETE') {
+                // Cancelled or failed – clear pending payment
+                const pending = getPendingPayments();
+                if (pending[paymentId]) {
+                    delete pending[paymentId];
+                    savePendingPayments(pending);
+                    showToast('❌ Payment was not completed. Your cart is still intact.', true);
+                }
+                // Clear query string
+                if (window.history && window.history.replaceState) {
+                    const cleanUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, cleanUrl);
+                }
+                return false;
+            }
+
+            const pending = getPendingPayments();
+            const pData = pending[paymentId];
+            if (!pData) {
+                showToast('❌ Invalid payment session.', true);
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+                return false;
+            }
+
+            // Payment success – create the order now
             const orderId = Date.now();
             const order = {
                 id: orderId,
                 date: new Date().toLocaleString(),
-                items: cart.map(item => ({ ...item })),
-                subtotal: info.subtotal,
-                deliveryFee: info.deliveryFee,
-                total: info.grandTotal,
-                status: 'Pending (PayFast)'
+                items: pData.cart.map(item => ({ ...item })),
+                subtotal: pData.deliveryInfo.subtotal,
+                deliveryFee: pData.deliveryInfo.deliveryFee,
+                total: pData.deliveryInfo.grandTotal,
+                customerEmail: pData.email,
+                deliveryAddress: pData.address,
+                status: 'Paid (PayFast)'
             };
+
+            orders = getOrders();
             orders.push(order);
             saveOrders(orders);
+            console.log('📋 Order created after successful payment:', order);
 
+            // Send emails
+            sendOrderEmails(order, 'PayFast', pData.email, pData.address);
+
+            // Clear the pending payment
+            delete pending[paymentId];
+            savePendingPayments(pending);
+
+            // Clear the cart (payment succeeded)
+            cart = [];
+            updateCartUI();
+            renderProducts(currentCategory);
+            refreshAdminOrdersIfOpen();
+
+            // Show confirmation
+            renderConfirmation(order);
+            showView('viewConfirmation');
+
+            // Clean the URL
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            return true;
+        }
+
+        function refreshAdminOrdersIfOpen() {
+            if (adminPanel.classList.contains('active')) {
+                const activeTab = document.querySelector('.admin-tab.active');
+                if (activeTab && activeTab.dataset.tab === 'orders') {
+                    renderAdminOrders();
+                }
+                renderAdminStats();
+            }
+        }
+
+        // PayFast checkout button – now just stores pending payment and redirects
+        document.getElementById('payfastCheckoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            if (cart.length === 0) {
+                showToast('Cart is empty', true);
+                return;
+            }
+
+            const info = validateCheckout();
+            if (!info) return;
+
+            const deliveryInfo = calculateDelivery(cart);
+            const paymentId = 'pf_' + Date.now();
+
+            // Store pending payment data
+            const pending = getPendingPayments();
+            pending[paymentId] = {
+                cart: cart.map(item => ({ ...item })),
+                email: info.email,
+                address: info.address,
+                deliveryInfo: deliveryInfo,
+                timestamp: Date.now()
+            };
+            savePendingPayments(pending);
+
+            // Build PayFast return/cancel URLs (use current page with query params)
+            const baseUrl = window.location.href.split('?')[0];
+            const returnUrl = baseUrl + '?payment_status=COMPLETE&m_payment_id=' + paymentId;
+            const cancelUrl = baseUrl + '?payment_status=CANCELLED&m_payment_id=' + paymentId;
+
+            // Update form fields
+            document.getElementById('payfastMerchantId').value = PAYFAST_MERCHANT_ID;
+            document.getElementById('payfastMerchantKey').value = PAYFAST_MERCHANT_KEY;
+            pfPaymentId.value = paymentId;
+            pfAmount.value = deliveryInfo.grandTotal.toFixed(2);
             const itemDesc = cart.map(i => `${i.name} x${i.quantity}`).join(', ');
+            pfItemDesc.value = itemDesc + ` (Delivery: R${deliveryInfo.deliveryFee.toFixed(2)})`;
+
+            // Set return/cancel URLs
+            const form = document.getElementById('payfastForm');
+            form.return_url.value = returnUrl;
+            form.cancel_url.value = cancelUrl;
+
+            // Signature
             const data = {
-                merchant_id: '35826911',
-                merchant_key: 'ispazfqkakyyi',
-                return_url: 'https://yourstore.com/success.html',
-                cancel_url: 'https://yourstore.com/cancel.html',
+                merchant_id: PAYFAST_MERCHANT_ID,
+                merchant_key: PAYFAST_MERCHANT_KEY,
+                return_url: returnUrl,
+                cancel_url: cancelUrl,
                 notify_url: 'https://yourstore.com/notify.html',
-                m_payment_id: orderId.toString(),
-                amount: info.grandTotal.toFixed(2),
+                m_payment_id: paymentId,
+                amount: deliveryInfo.grandTotal.toFixed(2),
                 item_name: 'One Chart Boutique Order',
-                item_description: itemDesc + ` (Delivery: R${info.deliveryFee.toFixed(2)})`
+                item_description: pfItemDesc.value
             };
             const signature = generateSignature(data, '');
-            pfPaymentId.value = data.m_payment_id;
-            pfAmount.value = data.amount;
-            pfItemDesc.value = data.item_description;
             pfSignature.value = signature;
 
-            cart = [];
-            updateCartUI();
-            renderProducts(currentCategory);
-            payfastForm.submit();
-            showToast('Redirecting to PayFast... Total: R' + info.grandTotal.toFixed(2));
-        }
-        document.getElementById('payfastCheckoutBtn').addEventListener('click', processPayFastCheckout);
+            // Don't clear cart yet! It will be cleared after successful return.
+            console.log('🔄 Redirecting to PayFast... Payment ID:', paymentId);
+            form.submit();
+        });
 
-        // ============================================================
-        // 11. CASH ON DELIVERY (with delivery)
-        // ============================================================
-        function placeOrderCOD() {
-            if (cart.length === 0) { showToast('Cart is empty'); return; }
+        // Cash on Delivery (unchanged, immediate order)
+        codCheckoutBtn.addEventListener('click', function() {
+            if (cart.length === 0) { showToast('Cart is empty', true); return; }
 
-            const info = calculateDelivery(cart);
+            const info = validateCheckout();
+            if (!info) return;
+
+            const deliveryInfo = calculateDelivery(cart);
             const orderId = Date.now();
+
             const order = {
                 id: orderId,
                 date: new Date().toLocaleString(),
                 items: cart.map(item => ({ ...item })),
-                subtotal: info.subtotal,
-                deliveryFee: info.deliveryFee,
-                total: info.grandTotal,
+                subtotal: deliveryInfo.subtotal,
+                deliveryFee: deliveryInfo.deliveryFee,
+                total: deliveryInfo.grandTotal,
+                customerEmail: info.email,
+                deliveryAddress: info.address,
                 status: 'Cash on Delivery'
             };
+
             orders.push(order);
             saveOrders(orders);
+            console.log('📋 Order placed (COD):', order);
+
+            sendOrderEmails(order, 'Cash on Delivery', info.email, info.address);
+            renderConfirmation(order);
+            showView('viewConfirmation');
 
             cart = [];
             updateCartUI();
             renderProducts(currentCategory);
-            showToast('✅ Order placed! Pay R' + info.grandTotal.toFixed(2) + ' cash on delivery.');
-        }
-
-        codCheckoutBtn.addEventListener('click', placeOrderCOD);
+            refreshAdminOrdersIfOpen();
+        });
 
         // ============================================================
-        // 12. RENDER PRODUCTS
+        // 15. RENDER PRODUCTS
         // ============================================================
         function renderProducts(category = 'all') {
             const filtered = category === 'all' ? products : products.filter(p => p.category === category);
             if (filtered.length === 0) {
                 grid.innerHTML =
-                    `<p style="grid-column:1/-1; text-align:center; color:#8a8a9a; padding:20px;">No products. Click "Reset Products" below.</p>`;
+                    `<p style="grid-column:1/-1; text-align:center; color:#8a8a9a; padding:20px;">No products.</p>`;
                 return;
             }
             grid.innerHTML = filtered.map(p => {
                 const inCart = cart.some(item => item.id === p.id);
                 return `
-                        <div class="product-card" onclick="openProductDetail(${p.id})">
-                            <div class="product-image">
-                                <img src="${p.image}" onerror="this.src='https://placehold.co/400x300/eee/ccc?text=No+Image'">
-                                ${p.badge ? `<span class="product-badge ${p.badge}">${p.badge}</span>` : ''}
-                            </div>
-                            <div class="product-info">
-                                <div class="product-category">${p.category}</div>
-                                <div class="product-name">${p.name}</div>
-                                <div class="product-price">
-                                    R${p.price.toFixed(2)}
-                                    ${p.oldPrice ? `<span class="old-price">R${p.oldPrice.toFixed(2)}</span>` : ''}
+                            <div class="product-card" onclick="openProductDetail(${p.id})">
+                                <div class="product-image">
+                                    <img src="${p.image}" onerror="this.src='https://placehold.co/400x300/eee/ccc?text=No+Image'">
+                                    ${p.badge ? `<span class="product-badge ${p.badge}">${p.badge}</span>` : ''}
                                 </div>
-                                <button class="add-to-cart ${inCart ? 'in-cart' : ''}" data-id="${p.id}" onclick="event.stopPropagation(); addToCart(${p.id})">
-                                    <i class="fas ${inCart ? 'fa-check' : 'fa-plus'}"></i>
-                                    ${inCart ? 'In Cart' : 'Add to Cart'}
-                                </button>
+                                <div class="product-info">
+                                    <div class="product-category">${p.category}</div>
+                                    <div class="product-name">${p.name}</div>
+                                    <div class="product-price">
+                                        R${p.price.toFixed(2)}
+                                        ${p.oldPrice ? `<span class="old-price">R${p.oldPrice.toFixed(2)}</span>` : ''}
+                                    </div>
+                                    <button class="add-to-cart ${inCart ? 'in-cart' : ''}" data-id="${p.id}" onclick="event.stopPropagation(); addToCart(${p.id})">
+                                        <i class="fas ${inCart ? 'fa-check' : 'fa-plus'}"></i>
+                                        ${inCart ? 'In Cart' : 'Add to Cart'}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
             }).join('');
         }
 
         // ============================================================
-        // 13. ADMIN LOGIN
+        // 16. ADMIN
         // ============================================================
         function showLoginForm() {
-            storefront.style.display = 'none';
+            showView('viewStorefront');
+            document.getElementById('storefront').style.display = 'none';
             adminLoginForm.style.display = 'block';
             adminPanel.classList.remove('active');
             adminLoginError.style.display = 'none';
@@ -1805,12 +2376,11 @@
 
         function hideLoginForm() {
             adminLoginForm.style.display = 'none';
-            storefront.style.display = 'block';
+            document.getElementById('storefront').style.display = 'block';
         }
 
         adminLoginBtn.addEventListener('click', function() {
-            const entered = adminPwd.value.trim();
-            if (entered === getAdminPassword()) {
+            if (adminPwd.value.trim() === getAdminPassword()) {
                 isAdminLoggedIn = true;
                 hideLoginForm();
                 const traffic = getTraffic();
@@ -1823,47 +2393,31 @@
                 adminPwd.focus();
             }
         });
+        adminPwd.addEventListener('keydown', e => { if (e.key === 'Enter') adminLoginBtn.click(); });
 
-        adminPwd.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') adminLoginBtn.click();
-        });
-
-        // ============================================================
-        // 14. ADMIN PANEL
-        // ============================================================
         function showAdminPanel() {
-            if (!isAdminLoggedIn) {
-                showLoginForm();
-                return;
-            }
-            storefront.style.display = 'none';
+            if (!isAdminLoggedIn) { showLoginForm(); return; }
+            showView('viewStorefront');
+            document.getElementById('storefront').style.display = 'none';
             adminLoginForm.style.display = 'none';
             adminPanel.classList.add('active');
             renderAdminProducts();
             renderAdminOrders();
             renderAdminStats();
+            loadSettings();
             switchTab('dashboard');
         }
 
         function hideAdminPanel() {
-            storefront.style.display = 'block';
+            document.getElementById('storefront').style.display = 'block';
             adminPanel.classList.remove('active');
             adminLoginForm.style.display = 'none';
+            showView('viewStorefront');
         }
-
-        goAdminBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (isAdminLoggedIn) {
-                showAdminPanel();
-            } else {
-                showLoginForm();
-            }
-        });
-
-        goStoreBtn.addEventListener('click', hideAdminPanel);
+        goAdminBtn.addEventListener('click', e => { e.preventDefault(); if (isAdminLoggedIn) showAdminPanel(); else
+                showLoginForm(); });
         exitAdminBtn.addEventListener('click', hideAdminPanel);
 
-        // Admin Tabs
         function switchTab(tabId) {
             adminTabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabId));
             [tabDashboard, tabProducts, tabOrders, tabSettings].forEach(el => el.style.display = 'none');
@@ -1874,179 +2428,133 @@
             if (tabId === 'orders') { tabOrders.style.display = 'block';
                 renderAdminOrders(); }
             if (tabId === 'settings') { tabSettings.style.display = 'block';
+                loadSettings();
                 renderSettings(); }
         }
+        adminTabs.forEach(tab => { tab.addEventListener('click', function() { switchTab(this.dataset.tab); }); });
 
-        adminTabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                switchTab(this.dataset.tab);
-            });
+        refreshOrdersBtn.addEventListener('click', function() {
+            renderAdminOrders();
+            showToast('✅ Orders refreshed');
         });
 
-        // ============================================================
-        // 15. ADMIN PRODUCTS (with Image Upload)
-        // ============================================================
-        function renderAdminProducts() {
-            if (products.length === 0) {
-                adminProductList.innerHTML =
-                    `<tr><td colspan="5" style="text-align:center; color:#8a8a9a; padding:20px;">No products.</td></tr>`;
+        clearOrdersBtn.addEventListener('click', function() {
+            if (confirm('Delete ALL orders? This cannot be undone.')) {
+                clearAllOrders();
+                orders = getOrders();
+                renderAdminOrders();
+                renderAdminStats();
+                showToast('🗑️ All orders cleared');
+            }
+        });
+
+        sendTestEmailBtn.addEventListener('click', function() {
+            const testEmail = testEmailInput.value.trim();
+            if (!testEmail || !testEmail.includes('@')) {
+                testEmailMessage.textContent = '❌ Please enter a valid email address.';
+                testEmailMessage.className = 'settings-message error';
                 return;
             }
-            adminProductList.innerHTML = products.map(p => `
-                    <tr>
-                        <td><img src="${p.image}" onerror="this.src='https://placehold.co/40/eee/ccc?text=?'"></td>
-                        <td>${p.name}</td>
-                        <td>${p.category}</td>
-                        <td>R${p.price.toFixed(2)}</td>
-                        <td>
-                            <button class="btn-edit" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="btn-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i> Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
-        }
 
-        function editProduct(id) {
-            const p = products.find(prod => prod.id === id);
-            if (!p) return;
-            editingId = id;
-            productFormTitle.textContent = 'Edit Product';
-            productSubmitBtn.textContent = 'Update Product';
-            editProductId.value = id;
-            pName.value = p.name;
-            pCategory.value = p.category;
-            pPrice.value = p.price;
-            pOldPrice.value = p.oldPrice || '';
-            pBadge.value = p.badge || '';
-            if (p.image) {
-                imagePreview.src = p.image;
-                imagePreview.style.display = 'block';
-                currentImageName.textContent = 'Current image';
-            } else {
-                imagePreview.style.display = 'none';
-                currentImageName.textContent = 'No image';
-            }
-            pImageData.value = p.image || '';
-            pImageFile.value = '';
-            window.scrollTo({ top: adminPanel.offsetTop, behavior: 'smooth' });
-        }
+            const testData = {
+                order_id: 'TEST123',
+                order_date: new Date().toLocaleString(),
+                payment_method: 'Test Payment',
+                delivery_address: '123 Test St, City',
+                items_list: 'Test Item x1 - R100.00',
+                subtotal: '100.00',
+                delivery_fee: '20.00',
+                bag_type: 'Small Plastic',
+                grand_total: '120.00',
+                subject: '🧪 Test Email from One Chart Boutique',
+                to_email: testEmail,
+                to_name: 'Test User',
+                customer_email: 'admin@test.com'
+            };
 
-        function deleteProduct(id) {
-            if (!confirm('Delete this product?')) return;
-            products = products.filter(p => p.id !== id);
-            saveProducts(products);
-            renderAdminProducts();
-            renderProducts(currentCategory);
-            renderAdminStats();
-            showToast('Product deleted');
-        }
+            testEmailMessage.textContent = '⏳ Sending test email...';
+            testEmailMessage.className = 'settings-message';
 
-        function resetProductForm() {
-            editingId = null;
-            productFormTitle.textContent = 'Add New Product';
-            productSubmitBtn.textContent = 'Save Product';
-            editProductId.value = '';
-            pName.value = '';
-            pCategory.value = 'electronics';
-            pPrice.value = '';
-            pOldPrice.value = '';
-            pImageFile.value = '';
-            imagePreview.style.display = 'none';
-            currentImageName.textContent = '';
-            pImageData.value = '';
-            pBadge.value = '';
-        }
-
-        resetBtn.addEventListener('click', resetProductForm);
-
-        pImageFile.addEventListener('change', function(e) {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    imagePreview.src = ev.target.result;
-                    imagePreview.style.display = 'block';
-                    currentImageName.textContent = file.name;
-                    pImageData.value = ev.target.result;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                if (!editingId) {
-                    imagePreview.style.display = 'none';
-                    currentImageName.textContent = '';
-                    pImageData.value = '';
-                }
-            }
-        });
-
-        productForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = pName.value.trim();
-            const category = pCategory.value;
-            const price = parseFloat(pPrice.value);
-            const oldPrice = pOldPrice.value ? parseFloat(pOldPrice.value) : null;
-            const badge = pBadge.value || null;
-            let image = pImageData.value;
-
-            if (!image && editingId) {
-                const existing = products.find(p => p.id === editingId);
-                if (existing) image = existing.image;
-            }
-
-            if (!image) { alert('Please upload an image for the product.'); return; }
-            if (!name || !category || isNaN(price)) { alert('Please fill in all required fields.'); return; }
-
-            const id = parseInt(editProductId.value) || Date.now();
-
-            if (editingId) {
-                const idx = products.findIndex(p => p.id === editingId);
-                if (idx !== -1) {
-                    products[idx] = { ...products[idx], name, category, price, oldPrice, image, badge };
-                }
-                showToast('Product updated!');
-            } else {
-                products.push({ id, name, category, price, oldPrice, image, badge });
-                showToast('Product added!');
-            }
-
-            saveProducts(products);
-            resetProductForm();
-            renderAdminProducts();
-            renderProducts(currentCategory);
-            renderAdminStats();
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CUSTOMER, testData)
+                .then(() => {
+                    testEmailMessage.textContent = '✅ Test email sent successfully to ' + testEmail +
+                        '! Check your inbox (and spam folder).';
+                    testEmailMessage.className = 'settings-message success';
+                    showToast('Test email sent to ' + testEmail);
+                })
+                .catch(err => {
+                    console.error('❌ Test email failed:', err);
+                    testEmailMessage.textContent = '❌ Test email failed: ' + (err.text || 'Unknown error') +
+                        '. Check console for details.';
+                    testEmailMessage.className = 'settings-message error';
+                    showToast('❌ Test email failed. Check console.', true);
+                });
         });
 
         // ============================================================
-        // 16. ADMIN ORDERS (with Delivery & Total)
+        // ADMIN ORDERS
         // ============================================================
         function renderAdminOrders() {
+            orders = getOrders();
+            console.log('📋 Admin orders reloaded:', orders.length);
             if (orders.length === 0) {
                 adminOrderList.innerHTML = '';
                 noOrdersMsg.style.display = 'block';
                 return;
             }
             noOrdersMsg.style.display = 'none';
-            adminOrderList.innerHTML = orders.slice().reverse().map(o => `
-                    <tr>
-                        <td>#${o.id}</td>
-                        <td>${o.date}</td>
-                        <td>${o.items.map(i => `${i.name} x${i.quantity}`).join(', ')}</td>
-                        <td>R${(o.subtotal || 0).toFixed(2)}</td>
-                        <td>R${(o.deliveryFee || 0).toFixed(2)}</td>
-                        <td><strong>R${o.total.toFixed(2)}</strong></td>
-                        <td><span style="background:${o.status.includes('COD') ? '#27ae60' : '#f28c28'}; color:#fff; padding:2px 10px; border-radius:20px; font-size:0.7rem;">${o.status}</span></td>
-                    </tr>
-                `).join('');
+
+            renderAdminStats();
+
+            adminOrderList.innerHTML = orders.slice().reverse().map(o => {
+                let statusClass = 'pending',
+                    statusText = o.status || 'Pending';
+                if (o.status && o.status.includes('COD')) statusClass = 'cod';
+                if (o.status && o.status.includes('Way')) { statusClass = 'shipped';
+                    statusText = '🚚 On the Way'; }
+                if (o.status && o.status.includes('Delivered')) { statusClass = 'delivered';
+                    statusText = '✅ Delivered'; }
+                if (o.status && o.status.includes('PayFast')) statusClass = 'pending';
+                const canShip = !o.status || (!o.status.includes('Way') && !o.status.includes('Delivered'));
+                const canDeliver = o.status && (o.status.includes('Way') || o.status.includes('COD') || o.status.includes(
+                    'PayFast')) && !o.status.includes('Delivered');
+
+                const info = calculateDelivery(o.items);
+
+                return `
+                            <tr>
+                                <td>#${o.id}</td>
+                                <td>${o.date}</td>
+                                <td>${o.items.map(i => `${i.name} x${i.quantity}`).join(', ')}</td>
+                                <td>R${info.subtotal.toFixed(2)}</td>
+                                <td>R${info.deliveryFee.toFixed(2)} (${info.bagType})</td>
+                                <td><strong>R${info.grandTotal.toFixed(2)}</strong></td>
+                                <td><span style="background:${o.status && o.status.includes('COD') ? '#27ae60' : '#f28c28'}; color:#fff; padding:2px 10px; border-radius:20px; font-size:0.7rem;">${o.status && o.status.includes('COD') ? 'COD' : 'PayFast'}</span></td>
+                                <td style="font-size:0.8rem;">${o.customerEmail || 'N/A'}</td>
+                                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                                <td>
+                                    ${canShip ? `<button class="btn-shipped" onclick="markOrderShipped(${o.id})" style="margin-bottom:3px;"><i class="fas fa-truck"></i> Ship</button>` : ''}
+                                    ${canDeliver ? `<button class="btn-delivered" onclick="markOrderDelivered(${o.id})"><i class="fas fa-check"></i> Deliver</button>` : ''}
+                                    ${(!canShip && !canDeliver) ? `<span style="font-size:0.7rem; color:#8a8a9a;">✓ Complete</span>` : ''}
+                                </td>
+                            </tr>
+                        `;
+            }).join('');
         }
 
         // ============================================================
-        // 17. ADMIN STATS & SETTINGS
+        // ADMIN STATS & SETTINGS
         // ============================================================
         function renderAdminStats() {
             statProducts.textContent = products.length;
+            orders = getOrders();
             statOrders.textContent = orders.length;
-            const revenue = orders.reduce((sum, o) => sum + o.total, 0);
-            statRevenue.textContent = `R${revenue.toFixed(2)}`;
+            let totalRevenue = 0;
+            orders.forEach(o => {
+                const info = calculateDelivery(o.items);
+                totalRevenue += info.grandTotal;
+            });
+            statRevenue.textContent = `R${totalRevenue.toFixed(2)}`;
             const traffic = getTraffic();
             statStoreVisits.textContent = traffic.storeVisits || 0;
             statAdminVisits.textContent = traffic.adminVisits || 0;
@@ -2060,26 +2568,65 @@
             settingsTodayVisits.textContent = traffic.todayCount || 0;
         }
 
+        function loadSettings() {
+            adminEmailInput.value = ADMIN_EMAIL;
+            payfastMerchantIdInput.value = PAYFAST_MERCHANT_ID;
+            payfastMerchantKeyInput.value = PAYFAST_MERCHANT_KEY;
+            adminEmailMessage.textContent = '';
+            payfastMessage.textContent = '';
+            passwordMessage.textContent = '';
+            testEmailMessage.textContent = '';
+        }
+
+        saveAdminEmailBtn.addEventListener('click', function() {
+            const newEmail = adminEmailInput.value.trim();
+            if (!newEmail || !newEmail.includes('@')) {
+                adminEmailMessage.textContent = '❌ Enter a valid email.';
+                adminEmailMessage.className = 'settings-message error';
+                return;
+            }
+            ADMIN_EMAIL = newEmail;
+            setConfig('admin_email', newEmail);
+            adminEmailMessage.textContent = '✅ Admin email updated!';
+            adminEmailMessage.className = 'settings-message success';
+            showToast('Admin email saved');
+        });
+
+        savePayfastBtn.addEventListener('click', function() {
+            const id = payfastMerchantIdInput.value.trim();
+            const key = payfastMerchantKeyInput.value.trim();
+            if (!id || !key) {
+                payfastMessage.textContent = '❌ Both fields required.';
+                payfastMessage.className = 'settings-message error';
+                return;
+            }
+            PAYFAST_MERCHANT_ID = id;
+            PAYFAST_MERCHANT_KEY = key;
+            setConfig('payfast_merchant_id', id);
+            setConfig('payfast_merchant_key', key);
+            payfastMessage.textContent = '✅ PayFast credentials updated!';
+            payfastMessage.className = 'settings-message success';
+            showToast('PayFast saved');
+        });
+
+        let payfastKeyVisible = false;
+        togglePayfastKey.addEventListener('click', function() {
+            payfastKeyVisible = !payfastKeyVisible;
+            payfastMerchantKeyInput.type = payfastKeyVisible ? 'text' : 'password';
+            this.querySelector('i').className = payfastKeyVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+        });
+
         changePasswordBtn.addEventListener('click', function() {
-            const pwd1 = newPassword.value.trim();
-            const pwd2 = confirmPassword.value.trim();
-            if (!pwd1 || !pwd2) {
-                passwordMessage.textContent = 'Both fields required.';
-                passwordMessage.style.color = '#e74c3c';
-                return;
-            }
-            if (pwd1 !== pwd2) {
-                passwordMessage.textContent = 'Passwords do not match!';
-                passwordMessage.style.color = '#e74c3c';
-                return;
-            }
-            if (pwd1.length < 4) {
-                passwordMessage.textContent = 'Minimum 4 characters.';
-                passwordMessage.style.color = '#e74c3c';
-                return;
-            }
+            const pwd1 = newPassword.value.trim(),
+                pwd2 = confirmPassword.value.trim();
+            if (!pwd1 || !pwd2) { passwordMessage.textContent = 'Both fields required.';
+                passwordMessage.style.color = '#e74c3c'; return; }
+            if (pwd1 !== pwd2) { passwordMessage.textContent = 'Passwords do not match.';
+                passwordMessage.style.color = '#e74c3c'; return; }
+            if (pwd1.length < 4) { passwordMessage.textContent = 'Min 4 characters.';
+                passwordMessage.style.color = '#e74c3c'; return; }
             setAdminPassword(pwd1);
-            passwordMessage.textContent = '✅ Password updated successfully!';
+            passwordMessage.textContent = '✅ Password updated!';
             passwordMessage.style.color = '#27ae60';
             newPassword.value = '';
             confirmPassword.value = '';
@@ -2096,24 +2643,37 @@
                 saveTraffic(t);
                 renderAdminStats();
                 renderSettings();
-                showToast('Traffic counters reset');
+                showToast('Traffic reset');
             }
         });
 
         // ============================================================
-        // 18. CATEGORY FILTERS
+        // 17. NAVIGATION
         // ============================================================
-        document.querySelectorAll('.category-pill').forEach(pill => {
-            pill.addEventListener('click', function() {
-                document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
-                this.classList.add('active');
-                currentCategory = this.dataset.category;
-                renderProducts(currentCategory);
-            });
+        goHomeBtn.addEventListener('click', e => { e.preventDefault();
+            showView('viewStorefront'); });
+        goTrackBtn.addEventListener('click', e => { e.preventDefault();
+            showView('viewTracking');
+            trackingResult.classList.remove('visible');
+            trackingError.classList.remove('visible'); });
+        heroTrackBtn.addEventListener('click', e => { e.preventDefault();
+            showView('viewTracking');
+            trackingResult.classList.remove('visible');
+            trackingError.classList.remove('visible'); });
+        confirmationContinueBtn.addEventListener('click', function() { showView('viewStorefront'); });
+        trackOrderBtn.addEventListener('click', trackOrder);
+        trackEmail.addEventListener('keydown', e => { if (e.key === 'Enter') trackOrder(); });
+        trackOrderId.addEventListener('keydown', e => { if (e.key === 'Enter') trackOrder(); });
+        document.getElementById('shopNowBtn').addEventListener('click', function() {
+            document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+        });
+        document.getElementById('searchBtn').addEventListener('click', function() { showToast('🔍 Search coming soon!'); });
+        document.getElementById('cartBtn').addEventListener('click', function() {
+            document.getElementById('cartItemsList').scrollIntoView({ behavior: 'smooth' });
         });
 
         // ============================================================
-        // 19. RESET PRODUCTS (hidden helper)
+        // 18. RESET PRODUCTS
         // ============================================================
         function resetToDefaultProducts() {
             if (confirm('Reset all products to default?')) {
@@ -2126,45 +2686,44 @@
                 showToast('Products reset to default');
             }
         }
-
-        // (Optional) Expose reset function for debugging if needed – not used in UI.
-
-        // ============================================================
-        // 20. SEARCH & SHOP NOW
-        // ============================================================
-        document.getElementById('searchBtn').addEventListener('click', function() {
-            showToast('🔍 Search feature coming soon!');
-        });
-
-        document.getElementById('shopNowBtn').addEventListener('click', function() {
-            document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
-        });
+        window.resetToDefaultProducts = resetToDefaultProducts;
 
         // ============================================================
-        // 21. INIT
+        // 19. INIT
         // ============================================================
         function init() {
-            // Increment store visits
             const traffic = getTraffic();
             traffic.storeVisits = (traffic.storeVisits || 0) + 1;
             const today = new Date().toDateString();
-            if (traffic.todayDate !== today) {
-                traffic.todayDate = today;
-                traffic.todayCount = 0;
-            }
+            if (traffic.todayDate !== today) { traffic.todayDate = today;
+                traffic.todayCount = 0; }
             traffic.todayCount = (traffic.todayCount || 0) + 1;
             saveTraffic(traffic);
 
-            renderProducts('all');
-            updateCartUI();
+            // Check if returning from PayFast
+            const isPaymentReturn = handlePaymentReturn();
+            if (isPaymentReturn) {
+                // If payment was successful, we already showed confirmation and cleared cart.
+                // We'll still render products but skip initial render to avoid double.
+                renderProducts('all');
+                updateCartUI();
+            } else {
+                renderProducts('all');
+                updateCartUI();
+            }
 
-            // (Optional) Console info – can be removed if you want zero logs, but left for helpfulness.
+            document.getElementById('payfastMerchantId').value = PAYFAST_MERCHANT_ID;
+            document.getElementById('payfastMerchantKey').value = PAYFAST_MERCHANT_KEY;
             console.log('✅ One Chart Boutique ready!');
             console.log('📦 Products loaded:', products.length);
             console.log('🔑 Admin password:', getAdminPassword());
-            console.log('📦 Delivery fees: Small R120 (1-7 items, <2 shoes), Large R140 (8+ items or 2+ shoes)');
+            console.log('📋 Orders loaded on init:', getOrders().length);
+            console.log('📧 EmailJS Template:', EMAILJS_TEMPLATE_CUSTOMER);
+            console.log('📧 EmailJS Service:', EMAILJS_SERVICE_ID);
+            console.log('📧 Admin email:', ADMIN_EMAIL);
+            console.log('💡 To test emails, go to Admin → Settings → EmailJS Test');
+            console.log('💳 PayFast now confirms order only after payment.');
         }
-
         init();
     </script>
 </body>
